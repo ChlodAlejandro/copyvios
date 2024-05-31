@@ -11,7 +11,7 @@ from earwigbot.wiki.copyvios.markov import EMPTY, MarkovChain
 from earwigbot.wiki.copyvios.parsers import ArticleTextParser
 from earwigbot.wiki.copyvios.result import CopyvioSource, CopyvioCheckResult
 
-from .misc import Query, get_db, get_cursor, get_sql_error, sql_dialect
+from .misc import Query, get_db, get_cursor, get_sql_error, sql_dialect, cache
 from .sites import get_site
 from .turnitin import search_turnitin
 
@@ -140,8 +140,9 @@ def _perform_check(query, page, use_engine, use_links):
     if not query.result:
         try:
             query.result = page.copyvio_check(
-                min_confidence=T_SUSPECT, max_queries=8, max_time=45,
-                no_searches=not use_engine, no_links=not use_links,
+                min_confidence=T_SUSPECT,
+                max_queries=cache.bot.config.wiki.search.get("maxQueries", 8),
+                max_time=45, no_searches=not use_engine, no_links=not use_links,
                 short_circuit=not query.noskip)
         except exceptions.SearchQueryError as exc:
             query.error = "search error"
