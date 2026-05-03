@@ -61,6 +61,15 @@
             <label for="cv-cb-engine" class="oo-ui-widget oo-ui-widget-enabled oo-ui-labelElement-label oo-ui-labelElement oo-ui-labelWidget">Use search engine</label>
         </span>
 
+        <input type="hidden" name="use_eds" value="0">
+        <span class="oo-ui-widget oo-ui-widget-enabled">
+            <span class="cv-search-oo-ui oo-ui-widget oo-ui-widget-enabled oo-ui-inputWidget oo-ui-checkboxInputWidget">
+                <input id="cv-cb-eds" class="cv-search oo-ui-inputWidget-input" type="checkbox" name="use_eds" value="1" {{ 'checked="checked"' if query.use_eds else "" }}>
+                <span class="oo-ui-checkboxInputWidget-checkIcon oo-ui-widget oo-ui-widget-enabled oo-ui-iconElement-icon oo-ui-icon-check oo-ui-iconElement oo-ui-labelElement-invisible oo-ui-iconWidget oo-ui-image-invert"></span>
+            </span>
+            <label for="cv-cb-eds" class="oo-ui-widget oo-ui-widget-enabled oo-ui-labelElement-label oo-ui-labelElement oo-ui-labelWidget">Use <a href="https://wikipedialibrary.wmflabs.org/">Wikipedia Library</a></label>
+        </span>
+
         <input type="hidden" name="use_links" value="0">
         <span class="oo-ui-widget oo-ui-widget-enabled">
             <span class="cv-search-oo-ui oo-ui-widget oo-ui-widget-enabled oo-ui-inputWidget oo-ui-checkboxInputWidget">
@@ -96,11 +105,13 @@
     </div>
     {% if query.nocache or (result and result.metadata.cached) %}
         <div class="oo-ui-layout oo-ui-horizontalLayout">
-            <span class="cv-search-oo-ui oo-ui-widget oo-ui-widget-enabled oo-ui-inputWidget oo-ui-checkboxInputWidget">
-                <input id="cb-nocache" class="oo-ui-inputWidget-input" type="checkbox" name="nocache" value="1" {{ 'checked="checked"' if query.nocache else "" }}>
-                <span class="oo-ui-checkboxInputWidget-checkIcon oo-ui-widget oo-ui-widget-enabled oo-ui-iconElement-icon oo-ui-icon-check oo-ui-iconElement oo-ui-labelElement-invisible oo-ui-iconWidget oo-ui-image-invert"></span>
+            <span class="oo-ui-widget oo-ui-widget-enabled">
+                <span class="cv-search-oo-ui oo-ui-widget oo-ui-widget-enabled oo-ui-inputWidget oo-ui-checkboxInputWidget">
+                    <input id="cb-nocache" class="oo-ui-inputWidget-input" type="checkbox" name="nocache" value="1" {{ 'checked="checked"' if query.nocache else "" }}>
+                    <span class="oo-ui-checkboxInputWidget-checkIcon oo-ui-widget oo-ui-widget-enabled oo-ui-iconElement-icon oo-ui-icon-check oo-ui-iconElement oo-ui-labelElement-invisible oo-ui-iconWidget oo-ui-image-invert"></span>
+                </span>
+                <label for="cb-nocache">Bypass cache</label>
             </span>
-            <label for="cb-nocache">Bypass cache</label>
         </div>
     {% endif %}
     <div class="oo-ui-layout oo-ui-horizontalLayout">

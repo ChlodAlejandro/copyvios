@@ -27,6 +27,7 @@ from copyvios.checker import (
     do_check,
 )
 from copyvios.cookies import get_cookies, get_new_cookies
+from copyvios.eds import get_eds_state
 from copyvios.highlighter import highlight_delta
 from copyvios.misc import get_notice, get_permalink
 from copyvios.query import CheckQuery
@@ -113,6 +114,8 @@ def index() -> AnyResponse:
     try:
         result = do_check(query)
         error = None
+        if result is not None:
+            get_eds_state()
     except CopyvioCheckError as exc:
         if exc.code == ErrorCode.NOT_LOGGED_IN:
             target = "/login?next=" + urllib.parse.quote_plus(

@@ -30,6 +30,7 @@ class CheckQuery(BaseQuery):
     oldid: str | None = None
     url: str | None = None
     use_engine: bool = True
+    use_eds: bool = True
     use_links: bool = True
     turnitin: bool = False
     nocache: bool = False

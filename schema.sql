@@ -11,6 +11,7 @@ CREATE TABLE cache_data (
     cdata_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     cdata_cache_id BINARY(32) NOT NULL,
     cdata_url VARCHAR(1024) NOT NULL,
+    cdata_title VARCHAR(1024),
     cdata_confidence DOUBLE NOT NULL DEFAULT 0,
     cdata_skipped BOOLEAN NOT NULL DEFAULT 0,
     cdata_excluded BOOLEAN NOT NULL DEFAULT 0,

@@ -91,7 +91,12 @@ def _get_results(
         query.action = "compare" if query.url else "search"
 
     if query.action == "search":
-        if not query.use_engine and not query.use_links and not query.turnitin:
+        if (
+            not query.use_engine
+            and not query.use_eds
+            and not query.use_links
+            and not query.turnitin
+        ):
             raise CopyvioCheckError(ErrorCode.NO_SEARCH_METHOD)
 
         # Handle the Turnitin check
@@ -166,7 +171,7 @@ def _perform_check(
     query: CheckQuery, page: Page, conn: PoolProxiedConnection
 ) -> CopyvioCheckResult:
     sql_error = get_sql_error()
-    mode = f"{query.use_engine}:{query.use_links}:"
+    mode = f"{query.use_engine}:{query.use_links}:${query.use_eds}"
     result: CopyvioCheckResult | None = None
 
     if not query.nocache:
@@ -177,7 +182,11 @@ def _perform_check(
 
     if not result:
         is_logged_in = session.get("username")
-        if query.use_engine and not is_logged_in and not isinstance(query, APIQuery):
+        if (
+            (query.use_engine or query.use_eds)
+            and not is_logged_in
+            and not isinstance(query, APIQuery)
+        ):
             raise CopyvioCheckError(ErrorCode.NOT_LOGGED_IN)
 
         try:
@@ -186,6 +195,7 @@ def _perform_check(
                 max_queries=8,
                 max_time=30,
                 no_searches=not query.use_engine,
+                no_eds=not query.use_eds,
                 no_links=not query.use_links,
                 short_circuit=not query.noskip,
             )
@@ -242,7 +252,7 @@ def _get_cached_results(
         return None
 
     cursor.execute(
-        f"""SELECT cdata_url, cdata_confidence, cdata_skipped, cdata_excluded
+        f"""SELECT cdata_url, cdata_confidence, cdata_skipped, cdata_excluded, cdata_title
         FROM cache_data
         WHERE cdata_cache_id = {_sql_param()}""",
         (cache_id,),
@@ -259,20 +269,21 @@ def _get_cached_results(
         result.metadata.cache_age = _format_date(cache_time)
         return result
 
-    url, confidence, skipped, excluded = data[0]
+    url, confidence, skipped, excluded, title = data[0]
     if skipped:  # Should be impossible: data must be bad; run a new check
         return None
     result = page.copyvio_compare(url, min_confidence=T_SUSPECT, max_time=10)
     if abs(result.confidence - confidence) >= 0.0001:
         return None
 
-    for url, confidence, skipped, excluded in data[1:]:
+    for url, confidence, skipped, excluded, title in data[1:]:
         if noskip and skipped:
             return None
-        source = CopyvioSource(typing.cast(CopyvioWorkspace, None), url)
+        source = CopyvioSource(typing.cast(CopyvioWorkspace, None), url, title=title)
         source.confidence = confidence
         source.skipped = bool(skipped)
         source.excluded = bool(excluded)
+        source.title = title
         result.sources.append(source)
 
     result.queries = queries
@@ -312,6 +323,7 @@ def _cache_result(
             source.confidence,
             source.skipped,
             source.excluded,
+            source.title,
         )
         for source in result.sources
     ]
@@ -330,8 +342,10 @@ def _cache_result(
         cur.executemany(
             f"""INSERT INTO cache_data (
                 cdata_cache_id, cdata_url, cdata_confidence, cdata_skipped,
-                cdata_excluded
-            ) VALUES ({_sql_param()}, {_sql_param()}, {_sql_param()}, {_sql_param()}, {_sql_param()})""",
+                cdata_excluded, cdata_title
+            ) VALUES (
+                {_sql_param()}, {_sql_param()}, {_sql_param()}, {_sql_param()}, {_sql_param()}, {_sql_param()}
+            )""",
             data,
         )
     except Exception:

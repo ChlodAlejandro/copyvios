@@ -46,7 +46,9 @@
                 <div>similarity</div>
             </td>
             <td>
-                {% if result.url %}
+                {% if result.title and result.url %}
+                    <a href="{{ result.url | e }}">{{ result.title | e }}</a>
+                {% elif result.url %}
                     <a href="{{ result.url | e }}">{{ result.url | urlstrip | e }}</a>
                 {% else %}
                     <span id="result-head-no-sources">No matches found.</span>
@@ -101,7 +103,7 @@
                 </tr>
                 {% for source in result.sources %}
                     <tr {{ 'class="source-default-hidden"' if loop.index0 >= 10 else 'id="source-row-selected"' if loop.index0 == 0 else "" }}>
-                        <td><a {{ 'id="source-selected"' if loop.index0 == 0 else "" }} class="source-url" href="{{ source.url | e }}">{{ source.url | e }}</a></td>
+                        <td><a {{ 'id="source-selected"' if loop.index0 == 0 else "" }} class="source-url" href="{{ source.url | e }}">{{ source.title or source.url | e }}</a></td>
                         <td>
                             {% if source.excluded %}
                                 <span class="source-excluded">Excluded</span>
@@ -141,7 +143,12 @@
             <p>{{ highlight_delta(result.article_chain, result.best.chains[1] if result.best else None) }}</p>
         </div></td>
         <td class="cv-chain-cell">Source: <div class="cv-chain-detail">
+            {% set has_eds_access = session.get("has_eds_access", False) %}
+            {% if has_eds_access %}
             <p>{{ highlight_delta(result.best.chains[0], result.best.chains[1]) if result.best else "" }}</p>
+            {% else %}
+            <p><i>Because you are not eligible to access content through The Wikipedia Library, we cannot display the source text for this match.</i></p>
+            {% endif %}
         </div></td>
     </tr>
 </table>

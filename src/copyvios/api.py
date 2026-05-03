@@ -24,7 +24,7 @@ _CHECK_ERRORS = {
     ErrorCode.NO_URL: "The parameter 'url' is required for URL comparisons",
     ErrorCode.NOT_LOGGED_IN: (
         "You are required to log in with your Wikipedia account "
-        "to perform checks with the search engine",
+        "to perform checks with the search engine or with The Wikipedia Library (EBSCO Discovery Service)",
     ),
     ErrorCode.TIMEOUT: "The given URL timed out before any data could be retrieved",
     ErrorCode.SEARCH_ERROR: (
@@ -53,6 +53,7 @@ def _serialize_source(
 
     data = {
         "url": source.url,
+        "title": source.title,
         "confidence": source.confidence,
         "violation": violation,
     }
